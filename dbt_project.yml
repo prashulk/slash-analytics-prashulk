@@ -1,0 +1,96 @@
+
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package name should reflect your organization's
+# name or the intended use of these models
+name: 'slash_analytics_take_home'
+version: '1.0.0'
+
+# This setting configures which "profile" dbt uses for this project.
+profile: 'slash_analytics_take_home'
+
+# These configurations specify where dbt should look for different types of files.
+# The `model-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  slash_analytics_take_home:
+    example:
+      +materialized: table
+
+    staging:
+      stg_entity:
+        +materialized: table
+      stg_cardevents:
+        +materialized: table
+      stg_cardtransactions:
+        +materialized: table
+
+    final:
+      final_entity:
+        +materialized: table
+        pre-hook:
+          - "DROP INDEX IF EXISTS idx_entity_subaccount"
+        post-hook:
+          - "CREATE INDEX IF NOT EXISTS idx_entity_subaccount ON {{ this }} (entity_id, subaccount_id)"
+
+      final_cardevents:
+        +materialized: table
+        pre-hook:
+          - "DROP INDEX IF EXISTS idx_card_events"
+        post-hook:
+          - "CREATE INDEX IF NOT EXISTS idx_card_events ON {{ this }} (card_event_id)"
+      
+      final_currencyconv:
+        +materialized: table
+
+      final_cardtransactions:
+        +materialized: table
+        pre-hook:
+          - "DROP INDEX IF EXISTS idx_card_tx"
+        post-hook:
+          - "CREATE INDEX IF NOT EXISTS idx_card_tx ON {{ this }} (transaction_id)"
+
+
+seeds:
+  slash_analytics_take_home:
+    card_events:
+      +column_types:
+        SLASH_ACCOUNT_ID: varchar
+        CARD_EVENT_ID: varchar
+        CARD_ID: varchar
+        EVENT_TYPE: varchar
+        CARD_STATUS: varchar
+        TIMESTAMP: timestamp
+    card_transactions:
+      +column_types:
+        TRANSACTION_ID: varchar
+        SUBACCOUNT_ID: varchar
+        CARD_ID: varchar
+        ACCOUNT_TYPE: varchar
+        TRANSACTION_AMOUNT: float
+        ORIGINAL_CURRENCY_CODE: varchar
+        MERCHANT_DESCRIPTION: varchar
+        MERCHANT_CATEGORY_CODE: varchar
+        MERCHANT_COUNTRY: varchar
+        TIMESTAMP: timestamp
+    entity:
+      +column_types:
+        ENTITY_ID: varchar
+        SUBACCOUNT_ID: varchar
+        ACCOUNT_CREATION_DATE: timestamp
+    currency_conv:
+      +column_types:
+        conversion_dt: date
+        source_currency: varchar
+        destination_currency: varchar
+        exchange_rate: float
