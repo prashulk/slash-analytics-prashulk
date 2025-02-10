@@ -53,7 +53,6 @@ Static CSV files loaded into the database for reference.
    dbt seed    # Load seed data
    dbt debug
    dbt run
-   dbt test  
    ```
 4. Use `currency.py` to fetch and update exchange rates:
    ```sh
